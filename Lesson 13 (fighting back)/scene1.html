@@ -1,0 +1,323 @@
+<html>
+<head><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script></head>
+<body>
+
+
+
+<style>
+
+body {
+  margin: 0;
+  height: 100vh;
+}
+
+canvas {
+  display: block;
+}
+
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/102/three.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.2/TweenMax.min.js"></script>
+<script>
+
+var scene = new THREE.Scene(); //created a three.js scene
+
+var camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000) //create a camera
+camera.position.z = 5;
+
+var renderer = new THREE.WebGLRenderer({antialias: true}); //create renderer
+renderer.setClearColor("darkgrey"); //essentially a background color
+renderer.setSize(window.innerWidth,window.innerHeight); //set renderer size to size of the page
+
+document.body.appendChild(renderer.domElement); //creates a canvas with our render's specifications
+
+window.addEventListener('resize', () => { //when the page is resized
+  renderer.setSize(window.innerWidth,window.innerHeight); //resize the renderer accordingly
+  camera.aspect = window.innerWidth / window.innerHeight; //re adjust aspect ratio
+
+  camera.updateProjectionMatrix(); //just updating our camera
+})
+
+
+
+var geometry = new THREE.BoxGeometry(1000, 1, 1000); //creates box (width, height, depth)
+var material = new THREE.MeshLambertMaterial({color: 0xFFCC00}); //creates material
+var floor = new THREE.Mesh(geometry, material); //creates a mesh out of our box and material
+
+scene.add(floor); //adds our mesh to the scene
+floor.position.y = -2;
+
+
+var geometry = new THREE.BoxGeometry(5, 5, 5); //creates box (width, height, depth)
+var material = new THREE.MeshLambertMaterial({color: 3763436}); //creates material
+var box1 = new THREE.Mesh(geometry, material); //creates a mesh out of our box and material
+
+scene.add(box1); //adds our mesh to the scene
+box1.position.x = -20;
+box1.position.z = 10;
+
+
+
+var geometry = new THREE.BoxGeometry(200, 40, 5); //creates box (width, height, depth)
+var material = new THREE.MeshLambertMaterial({color: 3763436}); //creates material
+var wall1 = new THREE.Mesh(geometry, material); //creates a mesh out of our box and material
+
+scene.add(wall1); //adds our mesh to the scene
+wall1.position.x = 0;
+wall1.position.z = -100;
+
+
+var geometry = new THREE.BoxGeometry(5, 40, 200); //creates box (width, height, depth)
+var material = new THREE.MeshLambertMaterial({color: 001010110101010010000000}); //creates material
+var wall2 = new THREE.Mesh(geometry, material); //creates a mesh out of our box and material
+
+scene.add(wall2); //adds our mesh to the scene
+wall2.position.x = 100;
+wall2.position.z = 0;
+
+
+var geometry = new THREE.BoxGeometry(200, 40, 5); //creates box (width, height, depth)
+var material = new THREE.MeshLambertMaterial({color: 5756504}); //creates material
+var wall3 = new THREE.Mesh(geometry, material); //creates a mesh out of our box and material
+
+scene.add(wall3); //adds our mesh to the scene
+wall3.position.x = 0;
+wall3.position.z = 100;
+
+
+var geometry = new THREE.BoxGeometry(5, 40, 200); //creates box (width, height, depth)
+var material = new THREE.MeshLambertMaterial({color: 101110010011100111101100}); //creates material
+var wall4 = new THREE.Mesh(geometry, material); //creates a mesh out of our box and material
+
+scene.add(wall4); //adds our mesh to the scene
+wall4.position.x = -100;
+wall4.position.z = 0;
+
+
+
+
+
+//enemies
+
+var geometry = new THREE.SphereGeometry(10);
+var material = new THREE.MeshLambertMaterial({color: 001101110110101000101101}); //creates material
+var charger1 = new THREE.Mesh(geometry, material); //creates a mesh out of our box and material
+
+scene.add(charger1); //adds our mesh to the scene
+charger1.position.x = 50;
+charger1.position.z = 50;
+charger1.charging = 0;
+charger1.direction = 0;
+charger1.health = 50;
+setInterval(function(){chargerAi(charger1)},50)
+
+
+
+
+var geometry = new THREE.ConeGeometry(5, 7); // (radius, height)
+var material = new THREE.MeshLambertMaterial({color: 001101110110101000101101}); //creates material
+var sniper1 = new THREE.Mesh(geometry, material); //creates a mesh out of our box and material
+
+scene.add(sniper1); //adds our mesh to the scene
+sniper1.position.x = -50;
+sniper1.position.z = 50;
+var geometry = new THREE.TetrahedronGeometry(1); // (radius)
+var material = new THREE.MeshLambertMaterial({color: 001101110110101000101101}); //creates material
+sniper1.bullet = new THREE.Mesh(geometry, material); //creates a mesh out of our box and material
+scene.add(sniper1.bullet); //adds our mesh to the scene
+sniper1.bullet.position.x=-1000;
+sniper1.fireing = 0;
+sniper1.bulletDirection = 0;
+sniper1.health = 5;
+setInterval(function(){sniperAi(sniper1)},10)
+
+
+
+var light = new THREE.PointLight(0xFFFFFF, 15, 5000); //creates a light (color, intensity, distance)
+light.position.set(0, 50, 0); //sets light position (x, y, z)
+scene.add(light); //add the light to the scene
+
+var meshVeolocity = 0.05;
+
+var render = function() {
+  requestAnimationFrame(render);
+  renderer.render(scene, camera); //just render (show) everything on our canvas
+}
+
+render();
+
+
+
+
+//disapear mouse cursor
+document.body.requestPointerLock = document.body.requestPointerLock ||
+                            document.body.mozRequestPointerLock;
+document.exitPointerLock = document.exitPointerLock ||
+                           document.mozExitPointerLock;
+document.body.onclick = function() {
+  document.body.requestPointerLock();
+};
+//end of code disapearing mouse cursor
+
+
+document.body.onmousemove = function(evt) {
+  camera.rotation.y-=evt.movementX/65;
+};
+
+var lasers = 0;
+document.body.onmousedown = function(evt) {
+  lasers = 1;
+};
+document.body.onmouseup = function(evt) {
+  lasers = 0;
+};
+
+var geometry = new THREE.BoxGeometry(0.3, 0.05, 0.2); // (width, height, depth)
+var material = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+var crosshairWidth = new THREE.Mesh( geometry, material );
+scene.add(crosshairWidth);
+var geometry = new THREE.BoxGeometry(0.05, 0.2, 0.05); // (width, height, depth)
+var material = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+var crosshairHeight = new THREE.Mesh( geometry, material );
+scene.add(crosshairHeight);
+
+setInterval(function(){
+  if(lasers==1) {
+
+    var direction = new THREE.Vector3();
+    camera.getWorldDirection( direction );
+    raycaster.set(camera.position, direction);
+    const intersects = raycaster.intersectObjects(scene.children);
+    if(intersects.length>0) {
+      if(intersects[0].object.geometry.type=="SphereGeometry"||intersects[0].object.geometry.type=="ConeGeometry") {
+        intersects[0].object.health-=1;
+        console.log(intersects[0].object.health);
+      }
+      crosshairWidth.position.x = camera.position.x;
+      crosshairWidth.position.y = camera.position.y;
+      crosshairWidth.position.z = camera.position.z;
+      crosshairWidth.position.add( direction );
+      crosshairHeight.position.x = camera.position.x;
+      crosshairHeight.position.y = camera.position.y;
+      crosshairHeight.position.z = camera.position.z;
+      crosshairHeight.position.add( direction );
+    }
+
+  } else {
+    crosshairWidth.position.x = -10000;
+    crosshairWidth.position.y = -10000;
+    crosshairWidth.position.z = -10000;
+    crosshairHeight.position.x = -10000;
+    crosshairHeight.position.y = -10000;
+    crosshairHeight.position.z = -10000;
+  }
+},10)
+
+
+var raycaster = new THREE.Raycaster();
+const middle = new THREE.Vector2();
+middle.x = window.innerWidth/2;
+middle.y = window.innerHeight/2;
+//NOTE TO DRAKE ABOUT PLAN: so raycast from camera and if an object is within a very close distance of the camera, dont let us move forwards in that direction
+$(document.body).keydown(function (evt) {
+
+  var direction = new THREE.Vector3();
+  camera.getWorldDirection( direction );
+  raycaster.set(camera.position, direction);
+  const intersects = raycaster.intersectObjects(scene.children);
+  if(intersects.length>0) {
+    if(intersects[0].distance<3) {} else {
+
+      if(evt.keyCode==38) { //forwards
+        camera.position.add( direction );
+      }
+
+    }
+  } else {
+    if(evt.keyCode==38) { //forwards
+      camera.position.add( direction );
+    }
+  }
+
+
+  if(evt.keyCode==32) { //jump
+    this.camera = camera;
+    this.tl = new TimelineMax().delay(0.3);
+    this.tl.to(this.camera.position, 0.5, {y: 3});
+    this.tl.to(this.camera.position, 0.5, {y: 0});
+  }
+});
+
+
+
+camera.health=50;
+
+
+
+function chargerAi(chargerName) {
+
+  if(chargerName.health<0) {
+    chargerName.position.x=-100000;
+  }
+
+  var direction = new THREE.Vector3();
+  camera.getWorldDirection( direction );
+  raycaster.set(camera.position, direction);
+  const intersects = raycaster.intersectObjects(scene.children);
+
+  if(chargerName.charging>0) {
+    chargerName.position.sub( chargerName.direction );
+    chargerName.charging-=0.01;
+
+    if(intersects.length>0&&intersects[0].object.geometry.type=="SphereGeometry"&&intersects[0].distance<3) {
+      camera.health-=1;
+      console.log(camera.health);
+    }
+
+  } else {
+    if(intersects.length>0) {
+      if(intersects[0].object.geometry.type=="SphereGeometry"&&intersects[0].distance<100) {
+        chargerName.charging=1;
+        chargerName.direction=direction;
+      }
+    }
+  }
+}
+
+
+function sniperAi(sniperName) {
+
+  if(sniperName.health<0) {
+    sniperName.position.x=-100000;
+  }
+
+  var direction = new THREE.Vector3();
+  camera.getWorldDirection( direction );
+  raycaster.set(camera.position, direction);
+  const intersects = raycaster.intersectObjects(scene.children);
+
+  if(sniperName.fireing>0) {
+    sniperName.bullet.position.sub( sniperName.direction );
+    sniperName.fireing-=0.01;
+    if(intersects.length>0&&intersects[0].object.geometry.type=="TetrahedronGeometry"&&intersects[0].distance<3) {
+      camera.health-=5;
+      console.log(camera.health);
+    }
+  } else {
+    if(intersects.length>0) {
+      if(sniperName.bullet.position.x!=-1000) {sniperName.bullet.position.x=-1000;}
+      if(intersects[0].object.geometry.type=="ConeGeometry") {
+        sniperName.fireing=1;
+        sniperName.direction=direction;
+        sniperName.bullet.position.x=sniperName.position.x;
+        sniperName.bullet.position.z=sniperName.position.z;
+      }
+    }
+  }
+}
+
+</script>
+
+</body>
+</html>
